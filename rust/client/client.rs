@@ -215,8 +215,16 @@ impl<F: FnMut(Request<()>) -> InterceptedRequestResult> RetryClient<F> {
             self.client.subscribe(once(async move { request })).await?;
         let mut stream: Streaming<SubscribeUpdate> = response.into_inner();
 
+        let mut counter = 0;
+
         println!("stream opened");
         while let Some(message) = stream.next().await {
+            counter += 1;
+            if counter == 10 {
+              let request2 = SubscribeRequest { slots: slots.clone(), accounts: HashMap::default(), transactions: HashMap::default(), blocks: HashMap::default(), blocks_meta: HashMap::default() };
+                let response: Response<Streaming<SubscribeUpdate>> = self.client.subscribe(once(async move { request2 })).await?;
+                stream = response.into_inner();
+            }
             match message {
                 Ok(message) => println!("new message: {:?}", message),
                 Err(error) => eprintln!("error: {:?}", error),

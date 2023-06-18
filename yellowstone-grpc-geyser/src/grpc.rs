@@ -804,6 +804,15 @@ impl Geyser for GrpcService {
         Ok(Response::new(response))
     }
 
+    async fn get_version(
+        &self,
+        _request: Request<GetVersionRequest>,
+    ) -> Result<Response<GetVersionResponse>, Status> {
+        Ok(Response::new(GetVersionResponse {
+            version: serde_json::to_string(&VERSION).unwrap(),
+        }))
+    }
+
     async fn get_latest_blockhash(
         &self,
         request: Request<GetLatestBlockhashRequest>,
@@ -860,14 +869,5 @@ impl Geyser for GrpcService {
         self.blocks_meta
             .is_blockhash_valid(&req.blockhash, req.commitment)
             .await
-    }
-
-    async fn get_version(
-        &self,
-        _request: Request<GetVersionRequest>,
-    ) -> Result<Response<GetVersionResponse>, Status> {
-        Ok(Response::new(GetVersionResponse {
-            version: serde_json::to_string(&VERSION).unwrap(),
-        }))
     }
 }

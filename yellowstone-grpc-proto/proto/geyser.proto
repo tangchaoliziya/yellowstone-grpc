@@ -9,11 +9,11 @@ package geyser;
 service Geyser {
   rpc Subscribe(stream SubscribeRequest) returns (stream SubscribeUpdate) {}
   rpc Ping(PingRequest) returns (PongResponse) {}
+  rpc GetVersion(GetVersionRequest) returns (GetVersionResponse) {}
   rpc GetLatestBlockhash(GetLatestBlockhashRequest) returns (GetLatestBlockhashResponse) {}
   rpc GetBlockHeight(GetBlockHeightRequest) returns (GetBlockHeightResponse) {}
   rpc GetSlot(GetSlotRequest) returns (GetSlotResponse) {}
   rpc IsBlockhashValid(IsBlockhashValidRequest) returns (IsBlockhashValidResponse) {}
-  rpc GetVersion(GetVersionRequest) returns (GetVersionResponse) {}
 }
 
 enum CommitmentLevel {
@@ -150,6 +150,12 @@ message PongResponse {
   int32 count = 1;
 }
 
+message GetVersionRequest {}
+
+message GetVersionResponse {
+  string version = 1;
+}
+
 message GetLatestBlockhashRequest {
   optional CommitmentLevel commitment = 1;
 }
@@ -174,12 +180,6 @@ message GetSlotRequest {
 
 message GetSlotResponse {
   uint64 slot = 1;
-}
-
-message GetVersionRequest {}
-
-message GetVersionResponse {
-  string version = 1;
 }
 
 message IsBlockhashValidRequest {

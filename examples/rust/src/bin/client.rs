@@ -77,6 +77,7 @@ enum Action {
         #[clap(long, short, default_value_t = 0)]
         count: i32,
     },
+    GetVersion,
     GetLatestBlockhash,
     GetBlockHeight,
     GetSlot,
@@ -84,7 +85,6 @@ enum Action {
         #[clap(long, short)]
         blockhash: String,
     },
-    GetVersion,
 }
 
 #[derive(Debug, Clone, clap::Args)]
@@ -329,6 +329,11 @@ async fn main() -> anyhow::Result<()> {
                     .await
                     .map_err(anyhow::Error::new)
                     .map(|response| info!("response: {response:?}")),
+                Action::GetVersion => client
+                    .get_version()
+                    .await
+                    .map_err(anyhow::Error::new)
+                    .map(|response| info!("response: {response:?}")),
                 Action::GetLatestBlockhash => client
                     .get_latest_blockhash(commitment)
                     .await
@@ -346,11 +351,6 @@ async fn main() -> anyhow::Result<()> {
                     .map(|response| info!("response: {response:?}")),
                 Action::IsBlockhashValid { blockhash } => client
                     .is_blockhash_valid(blockhash.clone(), commitment)
-                    .await
-                    .map_err(anyhow::Error::new)
-                    .map(|response| info!("response: {response:?}")),
-                Action::GetVersion => client
-                    .get_version()
                     .await
                     .map_err(anyhow::Error::new)
                     .map(|response| info!("response: {response:?}")),

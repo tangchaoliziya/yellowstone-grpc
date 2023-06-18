@@ -373,7 +373,7 @@ impl BlockMetaStorage {
         (Self { inner }, tx)
     }
 
-    fn parse_commitment(commitment: Option<i32>) -> Result<CommitmentLevel, Status> {
+    fn parse_commitment(commitment: Option<i32>) -> TonicResult<CommitmentLevel> {
         let commitment = commitment.unwrap_or(CommitmentLevel::Processed as i32);
         CommitmentLevel::from_i32(commitment).ok_or_else(|| {
             let msg = format!("failed to create CommitmentLevel from {commitment:?}");
@@ -381,11 +381,7 @@ impl BlockMetaStorage {
         })
     }
 
-    async fn get_block<F, T>(
-        &self,
-        handler: F,
-        commitment: Option<i32>,
-    ) -> Result<Response<T>, Status>
+    async fn get_block<F, T>(&self, handler: F, commitment: Option<i32>) -> TonicResult<Response<T>>
     where
         F: FnOnce(&MessageBlockMeta) -> Option<T>,
     {
@@ -411,7 +407,7 @@ impl BlockMetaStorage {
         &self,
         blockhash: &str,
         commitment: Option<i32>,
-    ) -> Result<Response<IsBlockhashValidResponse>, Status> {
+    ) -> TonicResult<Response<IsBlockhashValidResponse>> {
         let commitment = Self::parse_commitment(commitment)?;
         let storage = self.inner.read().await;
 
@@ -798,7 +794,7 @@ impl Geyser for GrpcService {
         Ok(Response::new(ReceiverStream::new(stream_rx)))
     }
 
-    async fn ping(&self, request: Request<PingRequest>) -> Result<Response<PongResponse>, Status> {
+    async fn ping(&self, request: Request<PingRequest>) -> TonicResult<Response<PongResponse>> {
         let count = request.get_ref().count;
         let response = PongResponse { count };
         Ok(Response::new(response))
@@ -807,7 +803,7 @@ impl Geyser for GrpcService {
     async fn get_version(
         &self,
         _request: Request<GetVersionRequest>,
-    ) -> Result<Response<GetVersionResponse>, Status> {
+    ) -> TonicResult<Response<GetVersionResponse>> {
         Ok(Response::new(GetVersionResponse {
             version: serde_json::to_string(&VERSION).unwrap(),
         }))
@@ -816,7 +812,7 @@ impl Geyser for GrpcService {
     async fn get_latest_blockhash(
         &self,
         request: Request<GetLatestBlockhashRequest>,
-    ) -> Result<Response<GetLatestBlockhashResponse>, Status> {
+    ) -> TonicResult<Response<GetLatestBlockhashResponse>> {
         self.blocks_meta
             .get_block(
                 |block| {
@@ -836,7 +832,7 @@ impl Geyser for GrpcService {
     async fn get_block_height(
         &self,
         request: Request<GetBlockHeightRequest>,
-    ) -> Result<Response<GetBlockHeightResponse>, Status> {
+    ) -> TonicResult<Response<GetBlockHeightResponse>> {
         self.blocks_meta
             .get_block(
                 |block| {
@@ -852,7 +848,7 @@ impl Geyser for GrpcService {
     async fn get_slot(
         &self,
         request: Request<GetSlotRequest>,
-    ) -> Result<Response<GetSlotResponse>, Status> {
+    ) -> TonicResult<Response<GetSlotResponse>> {
         self.blocks_meta
             .get_block(
                 |block| Some(GetSlotResponse { slot: block.slot }),
@@ -864,7 +860,7 @@ impl Geyser for GrpcService {
     async fn is_blockhash_valid(
         &self,
         request: Request<IsBlockhashValidRequest>,
-    ) -> Result<Response<IsBlockhashValidResponse>, Status> {
+    ) -> TonicResult<Response<IsBlockhashValidResponse>> {
         let req = request.get_ref();
         self.blocks_meta
             .is_blockhash_valid(&req.blockhash, req.commitment)

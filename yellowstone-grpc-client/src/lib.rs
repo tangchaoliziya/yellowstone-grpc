@@ -162,6 +162,12 @@ impl<F: Interceptor> GeyserGrpcClient<F> {
         Ok(response.into_inner())
     }
 
+    pub async fn get_version(&mut self) -> GeyserGrpcClientResult<GetVersionResponse> {
+        let request = tonic::Request::new(GetVersionRequest {});
+        let response = self.geyser.get_version(request).await?;
+        Ok(response.into_inner())
+    }
+
     pub async fn get_latest_blockhash(
         &mut self,
         commitment: Option<CommitmentLevel>,
@@ -205,12 +211,6 @@ impl<F: Interceptor> GeyserGrpcClient<F> {
             commitment: commitment.map(|value| value as i32),
         });
         let response = self.geyser.is_blockhash_valid(request).await?;
-        Ok(response.into_inner())
-    }
-
-    pub async fn get_version(&mut self) -> GeyserGrpcClientResult<GetVersionResponse> {
-        let request = tonic::Request::new(GetVersionRequest {});
-        let response = self.geyser.get_version(request).await?;
         Ok(response.into_inner())
     }
 }

@@ -6,6 +6,14 @@ members = [
     "yellowstone-grpc-proto", # 1.3.0+solana.1.16.1
 ]
 
+[patch.crates-io]
+solana-geyser-plugin-interface = { git = "https://github.com/rpcpool/solana-public", tag = "v1.16.1-geyser-update-bank" }
+solana-logger = { git = "https://github.com/rpcpool/solana-public", tag = "v1.16.1-geyser-update-bank" }
+solana-program = { git = "https://github.com/rpcpool/solana-public", tag = "v1.16.1-geyser-update-bank" }
+solana-runtime = { git = "https://github.com/rpcpool/solana-public", tag = "v1.16.1-geyser-update-bank" }
+solana-sdk = { git = "https://github.com/rpcpool/solana-public", tag = "v1.16.1-geyser-update-bank" }
+solana-transaction-status = { git = "https://github.com/rpcpool/solana-public", tag = "v1.16.1-geyser-update-bank" }
+
 [profile.release]
 debug = true
 lto = true

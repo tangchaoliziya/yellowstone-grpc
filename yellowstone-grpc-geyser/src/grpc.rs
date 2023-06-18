@@ -5,11 +5,13 @@ use {
         prom::{CONNECTIONS_TOTAL, INVALID_FULL_BLOCKS, MESSAGE_QUEUE_SIZE},
         proto::{
             self,
+            get_program_accounts_request_filter::Filter as GetProgramAccountsRequestFilterOneof,
             geyser_server::{Geyser, GeyserServer},
             subscribe_update::UpdateOneof,
             CommitmentLevel, GetBlockHeightRequest, GetBlockHeightResponse,
-            GetLatestBlockhashRequest, GetLatestBlockhashResponse, GetSlotRequest, GetSlotResponse,
-            GetVersionRequest, GetVersionResponse, IsBlockhashValidRequest,
+            GetLatestBlockhashRequest, GetLatestBlockhashResponse, GetProgramAccountsRequest,
+            GetProgramAccountsRequestFilter, GetProgramAccountsResponse, GetSlotRequest,
+            GetSlotResponse, GetVersionRequest, GetVersionResponse, IsBlockhashValidRequest,
             IsBlockhashValidResponse, PingRequest, PongResponse, SubscribeRequest, SubscribeUpdate,
             SubscribeUpdateAccount, SubscribeUpdateAccountInfo, SubscribeUpdateBlock,
             SubscribeUpdateBlockMeta, SubscribeUpdatePing, SubscribeUpdateSlot,
@@ -21,7 +23,13 @@ use {
     solana_geyser_plugin_interface::geyser_plugin_interface::{
         ReplicaAccountInfoV3, ReplicaBlockInfoV2, ReplicaTransactionInfoV2, SlotStatus,
     },
+    solana_rpc_client_api::{
+        filter::{Memcmp as RpcFilterMemcmp, RpcFilterType},
+        request::MAX_GET_PROGRAM_ACCOUNT_FILTERS,
+    },
+    solana_runtime::{accounts_index::ScanConfig, bank::Bank},
     solana_sdk::{
+        account::{AccountSharedData, ReadableAccount},
         clock::{UnixTimestamp, MAX_RECENT_BLOCKHASHES},
         pubkey::Pubkey,
         signature::Signature,
@@ -39,7 +47,7 @@ use {
         sync::{broadcast, mpsc, oneshot, RwLock},
         time::{sleep, Duration, Instant},
     },
-    tokio_stream::wrappers::ReceiverStream,
+    tokio_stream::wrappers::{ReceiverStream, UnboundedReceiverStream},
     tonic::{
         codec::CompressionEncoding,
         transport::server::{Server, TcpIncoming},
@@ -98,6 +106,25 @@ impl From<(u64, Option<u64>, SlotStatus)> for MessageSlot {
         Self {
             slot,
             parent,
+            status: match status {
+                SlotStatus::Processed => CommitmentLevel::Processed,
+                SlotStatus::Confirmed => CommitmentLevel::Confirmed,
+                SlotStatus::Rooted => CommitmentLevel::Finalized,
+            },
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct MessageUpdateBank {
+    pub bank: Arc<Bank>,
+    pub status: CommitmentLevel,
+}
+
+impl From<(Arc<Bank>, SlotStatus)> for MessageUpdateBank {
+    fn from((bank, status): (Arc<Bank>, SlotStatus)) -> Self {
+        Self {
+            bank,
             status: match status {
                 SlotStatus::Processed => CommitmentLevel::Processed,
                 SlotStatus::Confirmed => CommitmentLevel::Confirmed,
@@ -206,6 +233,7 @@ impl<'a> From<&'a ReplicaBlockInfoV2<'a>> for MessageBlockMeta {
 #[derive(Debug, Clone)]
 #[allow(clippy::large_enum_variant)]
 pub enum Message {
+    UpdateBank(MessageUpdateBank),
     Slot(MessageSlot),
     Account(MessageAccount),
     Transaction(MessageTransaction),
@@ -216,6 +244,7 @@ pub enum Message {
 impl From<&Message> for UpdateOneof {
     fn from(message: &Message) -> Self {
         match message {
+            Message::UpdateBank(_message) => unreachable!(),
             Message::Slot(message) => UpdateOneof::Slot(SubscribeUpdateSlot {
                 slot: message.slot,
                 parent: message.parent,
@@ -268,8 +297,9 @@ impl From<&Message> for UpdateOneof {
 }
 
 impl Message {
-    pub const fn get_slot(&self) -> u64 {
+    pub fn get_slot(&self) -> u64 {
         match self {
+            Self::UpdateBank(msg) => msg.bank.slot(),
             Self::Slot(msg) => msg.slot,
             Self::Account(msg) => msg.slot,
             Self::Transaction(msg) => msg.slot,
@@ -305,6 +335,9 @@ struct BlockMetaStorageInner {
     processed: Option<u64>,
     confirmed: Option<u64>,
     finalized: Option<u64>,
+    processed_bank: Option<Arc<Bank>>,
+    confirmed_bank: Option<Arc<Bank>>,
+    finalized_bank: Option<Arc<Bank>>,
 }
 
 #[derive(Debug)]
@@ -324,6 +357,14 @@ impl BlockMetaStorage {
             while let Some(message) = rx.recv().await {
                 let mut storage = storage.write().await;
                 match message {
+                    Message::UpdateBank(msg) => {
+                        match msg.status {
+                            CommitmentLevel::Processed => &mut storage.processed_bank,
+                            CommitmentLevel::Confirmed => &mut storage.confirmed_bank,
+                            CommitmentLevel::Finalized => &mut storage.finalized_bank,
+                        }
+                        .replace(msg.bank);
+                    }
                     Message::Slot(msg) => {
                         match msg.status {
                             CommitmentLevel::Processed => &mut storage.processed,
@@ -433,6 +474,87 @@ impl BlockMetaStorage {
             .unwrap_or(false);
 
         Ok(Response::new(IsBlockhashValidResponse { valid, slot }))
+    }
+
+    async fn get_program_accounts(
+        &self,
+        program_id: Vec<u8>,
+        filters: Vec<GetProgramAccountsRequestFilter>,
+        commitment: Option<i32>,
+    ) -> TonicResult<Response<<GrpcService as Geyser>::GetProgramAccountsStream>> {
+        let program_id = Pubkey::new_from_array(
+            program_id
+                .try_into()
+                .map_err(|_| Status::internal("invalid program_id"))?,
+        );
+
+        if filters.len() > MAX_GET_PROGRAM_ACCOUNT_FILTERS {
+            return Err(Status::internal(format!(
+                "too many filters provided; max {MAX_GET_PROGRAM_ACCOUNT_FILTERS}"
+            )));
+        }
+        let mut rpc_filters = vec![];
+        for filter in filters {
+            let filter = match filter.filter {
+                Some(GetProgramAccountsRequestFilterOneof::Memcmp(memcmp)) => {
+                    RpcFilterType::Memcmp(RpcFilterMemcmp::new_raw_bytes(
+                        memcmp.offset as usize,
+                        memcmp.bytes,
+                    ))
+                }
+                Some(GetProgramAccountsRequestFilterOneof::Datasize(datasize)) => {
+                    RpcFilterType::DataSize(datasize)
+                }
+                None => return Err(Status::internal("filter should be defined")),
+            };
+            if let Err(error) = filter.verify() {
+                return Err(Status::internal(format!("invalid filter: {error:?}")));
+            }
+            rpc_filters.push(filter);
+        }
+
+        let commitment = Self::parse_commitment(commitment)?;
+        let bank = match {
+            let storage = self.inner.read().await;
+            match commitment {
+                CommitmentLevel::Processed => &storage.processed_bank,
+                CommitmentLevel::Confirmed => &storage.confirmed_bank,
+                CommitmentLevel::Finalized => &storage.finalized_bank,
+            }
+            .clone()
+        } {
+            Some(bank) => bank,
+            None => {
+                return Err(Status::internal(format!(
+                    "bank not available for {commitment:?}"
+                )));
+            }
+        };
+        let slot = bank.slot();
+
+        let filter_closure = |account: &AccountSharedData| {
+            rpc_filters
+                .iter()
+                .all(|filter_type| filter_type.allows(account))
+        };
+
+        let accounts = bank
+            .get_filtered_program_accounts(&program_id, filter_closure, &ScanConfig::default())
+            .map_err(|error| Status::internal(format!("scan error: {error:?}")))?;
+
+        let (stream_tx, stream_rx) = mpsc::unbounded_channel();
+        for (pubkey, account) in accounts {
+            let _ = stream_tx.send(Ok(GetProgramAccountsResponse {
+                slot,
+                pubkey: pubkey.as_ref().into(),
+                lamports: account.lamports(),
+                data: account.data().into(),
+                owner: account.owner().as_ref().into(),
+                executable: account.executable(),
+                rent_epoch: account.rent_epoch(),
+            }));
+        }
+        Ok(Response::new(UnboundedReceiverStream::new(stream_rx)))
     }
 }
 
@@ -574,6 +696,11 @@ impl GrpcService {
                 Some(message) = messages_rx.recv() => {
                     MESSAGE_QUEUE_SIZE.dec();
 
+                    if let Message::UpdateBank(_) = message {
+                        let _ = blocks_meta_tx.send(message);
+                        continue;
+                    }
+
                     if matches!(message, Message::Slot(_) | Message::BlockMeta(_)) {
                         let _ = blocks_meta_tx.send(message.clone());
                     }
@@ -710,6 +837,8 @@ impl GrpcService {
 #[tonic::async_trait]
 impl Geyser for GrpcService {
     type SubscribeStream = ReceiverStream<TonicResult<SubscribeUpdate>>;
+    type GetProgramAccountsStream =
+        UnboundedReceiverStream<TonicResult<GetProgramAccountsResponse>>;
 
     async fn subscribe(
         &self,
@@ -864,6 +993,16 @@ impl Geyser for GrpcService {
         let req = request.get_ref();
         self.blocks_meta
             .is_blockhash_valid(&req.blockhash, req.commitment)
+            .await
+    }
+
+    async fn get_program_accounts(
+        &self,
+        request: Request<GetProgramAccountsRequest>,
+    ) -> TonicResult<Response<Self::GetProgramAccountsStream>> {
+        let req = request.into_inner();
+        self.blocks_meta
+            .get_program_accounts(req.program_id, req.filters, req.commitment)
             .await
     }
 }

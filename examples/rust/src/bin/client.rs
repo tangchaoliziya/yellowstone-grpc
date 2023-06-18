@@ -85,6 +85,7 @@ enum Action {
         #[clap(long, short)]
         blockhash: String,
     },
+    GetProgramAccounts,
 }
 
 #[derive(Debug, Clone, clap::Args)]
@@ -354,6 +355,14 @@ async fn main() -> anyhow::Result<()> {
                     .await
                     .map_err(anyhow::Error::new)
                     .map(|response| info!("response: {response:?}")),
+                Action::GetProgramAccounts => {
+                    // TODO
+                    client
+                        .get_program_accounts()
+                        .await
+                        .map_err(anyhow::Error::new)
+                        .map(|response| info!("response: {response:?}"))
+                }
             }
             .map_err(backoff::Error::transient)?;
 

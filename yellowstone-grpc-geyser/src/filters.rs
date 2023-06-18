@@ -76,6 +76,7 @@ impl Filter {
 
     pub fn get_filters(&self, message: &Message) -> Vec<String> {
         match message {
+            Message::UpdateBank(_message) => unreachable!(),
             Message::Account(message) => self.accounts.get_filters(message),
             Message::Slot(message) => self.slots.get_filters(message),
             Message::Transaction(message) => self.transactions.get_filters(message),

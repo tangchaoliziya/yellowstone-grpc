@@ -3,9 +3,10 @@ use {
     futures::{
         channel::mpsc,
         sink::{Sink, SinkExt},
-        stream::Stream,
+        stream::{Stream, StreamExt},
     },
     http::uri::InvalidUri,
+    solana_sdk::pubkey::Pubkey,
     std::collections::HashMap,
     tonic::{
         codec::Streaming,
@@ -18,11 +19,11 @@ use {
     yellowstone_grpc_proto::prelude::{
         geyser_client::GeyserClient, CommitmentLevel, GetBlockHeightRequest,
         GetBlockHeightResponse, GetLatestBlockhashRequest, GetLatestBlockhashResponse,
-        GetSlotRequest, GetSlotResponse, GetVersionRequest, GetVersionResponse,
-        IsBlockhashValidRequest, IsBlockhashValidResponse, PingRequest, PongResponse,
-        SubscribeRequest, SubscribeRequestFilterAccounts, SubscribeRequestFilterBlocks,
-        SubscribeRequestFilterBlocksMeta, SubscribeRequestFilterSlots,
-        SubscribeRequestFilterTransactions, SubscribeUpdate,
+        GetProgramAccountsRequest, GetProgramAccountsResponse, GetSlotRequest, GetSlotResponse,
+        GetVersionRequest, GetVersionResponse, IsBlockhashValidRequest, IsBlockhashValidResponse,
+        PingRequest, PongResponse, SubscribeRequest, SubscribeRequestFilterAccounts,
+        SubscribeRequestFilterBlocks, SubscribeRequestFilterBlocksMeta,
+        SubscribeRequestFilterSlots, SubscribeRequestFilterTransactions, SubscribeUpdate,
     },
 };
 
@@ -212,6 +213,33 @@ impl<F: Interceptor> GeyserGrpcClient<F> {
         });
         let response = self.geyser.is_blockhash_valid(request).await?;
         Ok(response.into_inner())
+    }
+
+    // TODO
+    pub async fn get_program_accounts(&mut self) -> GeyserGrpcClientResult<()> {
+        let pubkey: Pubkey = "Sysvar1111111111111111111111111111111111111"
+            .parse::<Pubkey>()
+            .unwrap();
+        let request = tonic::Request::new(GetProgramAccountsRequest {
+            program_id: pubkey.as_ref().into(),
+            filters: vec![],
+            commitment: Some(CommitmentLevel::Processed as i32),
+        });
+        // let response = self.geyser.get_program_accounts(request).await?;
+        // let (subscribe_tx, subscribe_rx) = mpsc::unbounded();
+        let response: Response<Streaming<GetProgramAccountsResponse>> =
+            self.geyser.get_program_accounts(request).await?;
+        let mut stream = response.into_inner();
+        while let Some(Ok(msg)) = stream.next().await {
+            println!(
+                "{}, {}: {}, {}",
+                msg.slot,
+                Pubkey::try_from(msg.pubkey).unwrap(),
+                msg.lamports,
+                msg.data.len()
+            );
+        }
+        Ok(())
     }
 }
 

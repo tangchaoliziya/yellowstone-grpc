@@ -8,8 +8,12 @@ use {
         GeyserPlugin, GeyserPluginError, ReplicaAccountInfoVersions, ReplicaBlockInfoVersions,
         ReplicaTransactionInfoVersions, Result as PluginResult, SlotStatus,
     },
+    solana_runtime::bank::Bank,
     std::{
-        sync::atomic::{AtomicBool, Ordering},
+        sync::{
+            atomic::{AtomicBool, Ordering},
+            Arc,
+        },
         time::Duration,
     },
     tokio::{
@@ -150,6 +154,17 @@ impl GeyserPlugin for Plugin {
             let message = Message::Slot((slot, parent, status).into());
             inner.send_message(message);
             prom::update_slot_status(status, slot);
+
+            Ok(())
+        })
+    }
+
+    fn update_bank(&self, bank: Option<Arc<Bank>>, status: SlotStatus) -> PluginResult<()> {
+        self.with_inner(|inner| {
+            if let Some(bank) = bank {
+                let message = Message::UpdateBank((bank, status).into());
+                inner.send_message(message);
+            }
 
             Ok(())
         })

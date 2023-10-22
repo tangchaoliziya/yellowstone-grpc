@@ -249,6 +249,7 @@ impl ArgsAction {
                         UpdateOneof::Ping(_) => continue,
                         UpdateOneof::BlockMeta(msg) => msg.slot,
                         UpdateOneof::Entry(msg) => msg.slot,
+                        UpdateOneof::BankingTransactionErrors(msg) => msg.slot,
                     };
                     let hash = Sha256::digest(&payload);
                     let key = format!("{slot}_{}", const_hex::encode(hash));

@@ -306,6 +306,7 @@ impl Action {
                         blocks_meta,
                         commitment: commitment.map(|x| x as i32),
                         accounts_data_slice,
+                        subsribe_banking_transaction_results: true,
                     },
                     args.resub.unwrap_or(0),
                 ))
@@ -562,6 +563,7 @@ async fn geyser_subscribe(
                     blocks_meta: HashMap::default(),
                     commitment: None,
                     accounts_data_slice: Vec::default(),
+                    subsribe_banking_transaction_results: false,
                 })
                 .await
                 .map_err(GeyserGrpcClientError::SubscribeSendError)?;

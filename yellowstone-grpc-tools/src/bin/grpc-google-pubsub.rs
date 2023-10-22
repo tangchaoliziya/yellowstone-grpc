@@ -166,6 +166,7 @@ impl ArgsAction {
                     UpdateOneof::Ping(_) => continue,
                     UpdateOneof::BlockMeta(msg) => msg.slot,
                     UpdateOneof::Entry(msg) => msg.slot,
+                    UpdateOneof::BankingTransactionErrors(msg) => msg.slot,
                 };
                 if msg_slot != slot {
                     msg_slot = slot;
@@ -243,6 +244,9 @@ impl ArgsAction {
                     Some(UpdateOneof::Ping(_)) => {}
                     Some(UpdateOneof::BlockMeta(msg)) => info!("#{}, blockmeta", msg.slot),
                     Some(UpdateOneof::Entry(msg)) => info!("#{}, entry", msg.slot),
+                    Some(UpdateOneof::BankingTransactionErrors(msg)) => {
+                        info!("#{} banking stage error", msg.slot)
+                    }
                     None => {}
                 },
                 Err(error) => {

@@ -1,3 +1,4 @@
+use solana_geyser_plugin_interface::geyser_plugin_interface::ReplicaBlockInfoV2;
 use yellowstone_grpc_proto::prelude::SubscribeUpdateBankingTransactionResults;
 
 use {
@@ -9,7 +10,7 @@ use {
     },
     log::{error, info},
     solana_geyser_plugin_interface::geyser_plugin_interface::{
-        ReplicaAccountInfoV3, ReplicaBlockInfoV3, ReplicaEntryInfo, ReplicaTransactionInfoV2,
+        ReplicaAccountInfoV3, ReplicaEntryInfo, ReplicaTransactionInfoV2,
         SlotStatus,
     },
     solana_sdk::{
@@ -285,8 +286,8 @@ pub struct MessageBlockMeta {
     pub entries_count: u64,
 }
 
-impl<'a> From<&'a ReplicaBlockInfoV3<'a>> for MessageBlockMeta {
-    fn from(blockinfo: &'a ReplicaBlockInfoV3<'a>) -> Self {
+impl<'a> From<&'a ReplicaBlockInfoV2<'a>> for MessageBlockMeta {
+    fn from(blockinfo: &'a ReplicaBlockInfoV2<'a>) -> Self {
         Self {
             parent_slot: blockinfo.parent_slot,
             slot: blockinfo.slot,
@@ -296,7 +297,7 @@ impl<'a> From<&'a ReplicaBlockInfoV3<'a>> for MessageBlockMeta {
             block_time: blockinfo.block_time,
             block_height: blockinfo.block_height,
             executed_transaction_count: blockinfo.executed_transaction_count,
-            entries_count: blockinfo.entry_count,
+            entries_count: 0,
         }
     }
 }

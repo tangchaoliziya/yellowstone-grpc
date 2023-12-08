@@ -3521,8 +3521,8 @@ dependencies = [
 
 [[package]]
 name = "solana-account-decoder"
-version = "1.16.17"
-source = "git+https://github.com/blockworks-foundation/solana.git?branch=geyser_send_transaction_results_v1.16.17#445f8e7c5185e1c610a98267604a19679d0bade0"
+version = "1.16.21"
+source = "git+https://github.com/blockworks-foundation/solana.git?tag=geyser_send_transaction_results_v1.16.21#39d9ef53392d73d341781dad8fbade4a259f6acf"
 dependencies = [
  "Inflector",
  "base64 0.21.4",
@@ -3535,7 +3535,7 @@ dependencies = [
  "serde_json",
  "solana-address-lookup-table-program",
  "solana-config-program",
- "solana-sdk 1.16.17",
+ "solana-sdk 1.16.21",
  "spl-token",
  "spl-token-2022",
  "spl-token-metadata-interface",
@@ -3545,8 +3545,8 @@ dependencies = [
 
 [[package]]
 name = "solana-address-lookup-table-program"
-version = "1.16.17"
-source = "git+https://github.com/blockworks-foundation/solana.git?branch=geyser_send_transaction_results_v1.16.17#445f8e7c5185e1c610a98267604a19679d0bade0"
+version = "1.16.21"
+source = "git+https://github.com/blockworks-foundation/solana.git?tag=geyser_send_transaction_results_v1.16.21#39d9ef53392d73d341781dad8fbade4a259f6acf"
 dependencies = [
  "bincode",
  "bytemuck",
@@ -3555,31 +3555,31 @@ dependencies = [
  "num-traits",
  "rustc_version",
  "serde",
- "solana-frozen-abi 1.16.17",
- "solana-frozen-abi-macro 1.16.17",
- "solana-program 1.16.17",
+ "solana-frozen-abi 1.16.21",
+ "solana-frozen-abi-macro 1.16.21",
+ "solana-program 1.16.21",
  "solana-program-runtime",
- "solana-sdk 1.16.17",
+ "solana-sdk 1.16.21",
  "thiserror",
 ]
 
 [[package]]
 name = "solana-config-program"
-version = "1.16.17"
-source = "git+https://github.com/blockworks-foundation/solana.git?branch=geyser_send_transaction_results_v1.16.17#445f8e7c5185e1c610a98267604a19679d0bade0"
+version = "1.16.21"
+source = "git+https://github.com/blockworks-foundation/solana.git?tag=geyser_send_transaction_results_v1.16.21#39d9ef53392d73d341781dad8fbade4a259f6acf"
 dependencies = [
  "bincode",
  "chrono",
  "serde",
  "serde_derive",
  "solana-program-runtime",
- "solana-sdk 1.16.17",
+ "solana-sdk 1.16.21",
 ]
 
 [[package]]
 name = "solana-frozen-abi"
-version = "1.16.17"
-source = "git+https://github.com/blockworks-foundation/solana.git?branch=geyser_send_transaction_results_v1.16.17#445f8e7c5185e1c610a98267604a19679d0bade0"
+version = "1.16.21"
+source = "git+https://github.com/blockworks-foundation/solana.git?tag=geyser_send_transaction_results_v1.16.21#39d9ef53392d73d341781dad8fbade4a259f6acf"
 dependencies = [
  "ahash 0.8.4",
  "blake3",
@@ -3603,7 +3603,7 @@ dependencies = [
  "serde_derive",
  "serde_json",
  "sha2 0.10.8",
- "solana-frozen-abi-macro 1.16.17",
+ "solana-frozen-abi-macro 1.16.21",
  "subtle",
  "thiserror",
 ]
@@ -3640,8 +3640,8 @@ dependencies = [
 
 [[package]]
 name = "solana-frozen-abi-macro"
-version = "1.16.17"
-source = "git+https://github.com/blockworks-foundation/solana.git?branch=geyser_send_transaction_results_v1.16.17#445f8e7c5185e1c610a98267604a19679d0bade0"
+version = "1.16.21"
+source = "git+https://github.com/blockworks-foundation/solana.git?tag=geyser_send_transaction_results_v1.16.21#39d9ef53392d73d341781dad8fbade4a259f6acf"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -3663,19 +3663,19 @@ dependencies = [
 
 [[package]]
 name = "solana-geyser-plugin-interface"
-version = "1.16.17"
-source = "git+https://github.com/blockworks-foundation/solana.git?branch=geyser_send_transaction_results_v1.16.17#445f8e7c5185e1c610a98267604a19679d0bade0"
+version = "1.16.21"
+source = "git+https://github.com/blockworks-foundation/solana.git?tag=geyser_send_transaction_results_v1.16.21#39d9ef53392d73d341781dad8fbade4a259f6acf"
 dependencies = [
  "log",
- "solana-sdk 1.16.17",
+ "solana-sdk 1.16.21",
  "solana-transaction-status",
  "thiserror",
 ]
 
 [[package]]
 name = "solana-logger"
-version = "1.16.17"
-source = "git+https://github.com/blockworks-foundation/solana.git?branch=geyser_send_transaction_results_v1.16.17#445f8e7c5185e1c610a98267604a19679d0bade0"
+version = "1.16.21"
+source = "git+https://github.com/blockworks-foundation/solana.git?tag=geyser_send_transaction_results_v1.16.21#39d9ef53392d73d341781dad8fbade4a259f6acf"
 dependencies = [
  "env_logger 0.9.3",
  "lazy_static",
@@ -3695,30 +3695,30 @@ dependencies = [
 
 [[package]]
 name = "solana-measure"
-version = "1.16.17"
-source = "git+https://github.com/blockworks-foundation/solana.git?branch=geyser_send_transaction_results_v1.16.17#445f8e7c5185e1c610a98267604a19679d0bade0"
+version = "1.16.21"
+source = "git+https://github.com/blockworks-foundation/solana.git?tag=geyser_send_transaction_results_v1.16.21#39d9ef53392d73d341781dad8fbade4a259f6acf"
 dependencies = [
  "log",
- "solana-sdk 1.16.17",
+ "solana-sdk 1.16.21",
 ]
 
 [[package]]
 name = "solana-metrics"
-version = "1.16.17"
-source = "git+https://github.com/blockworks-foundation/solana.git?branch=geyser_send_transaction_results_v1.16.17#445f8e7c5185e1c610a98267604a19679d0bade0"
+version = "1.16.21"
+source = "git+https://github.com/blockworks-foundation/solana.git?tag=geyser_send_transaction_results_v1.16.21#39d9ef53392d73d341781dad8fbade4a259f6acf"
 dependencies = [
  "crossbeam-channel",
  "gethostname",
  "lazy_static",
  "log",
  "reqwest",
- "solana-sdk 1.16.17",
+ "solana-sdk 1.16.21",
 ]
 
 [[package]]
 name = "solana-program"
-version = "1.16.17"
-source = "git+https://github.com/blockworks-foundation/solana.git?branch=geyser_send_transaction_results_v1.16.17#445f8e7c5185e1c610a98267604a19679d0bade0"
+version = "1.16.21"
+source = "git+https://github.com/blockworks-foundation/solana.git?tag=geyser_send_transaction_results_v1.16.21#39d9ef53392d73d341781dad8fbade4a259f6acf"
 dependencies = [
  "ark-bn254",
  "ark-ec",
@@ -3760,9 +3760,9 @@ dependencies = [
  "serde_json",
  "sha2 0.10.8",
  "sha3 0.10.8",
- "solana-frozen-abi 1.16.17",
- "solana-frozen-abi-macro 1.16.17",
- "solana-sdk-macro 1.16.17",
+ "solana-frozen-abi 1.16.21",
+ "solana-frozen-abi-macro 1.16.21",
+ "solana-sdk-macro 1.16.21",
  "thiserror",
  "tiny-bip39",
  "wasm-bindgen",
@@ -3825,8 +3825,8 @@ dependencies = [
 
 [[package]]
 name = "solana-program-runtime"
-version = "1.16.17"
-source = "git+https://github.com/blockworks-foundation/solana.git?branch=geyser_send_transaction_results_v1.16.17#445f8e7c5185e1c610a98267604a19679d0bade0"
+version = "1.16.21"
+source = "git+https://github.com/blockworks-foundation/solana.git?tag=geyser_send_transaction_results_v1.16.21#39d9ef53392d73d341781dad8fbade4a259f6acf"
 dependencies = [
  "base64 0.21.4",
  "bincode",
@@ -3841,19 +3841,19 @@ dependencies = [
  "rand 0.7.3",
  "rustc_version",
  "serde",
- "solana-frozen-abi 1.16.17",
- "solana-frozen-abi-macro 1.16.17",
+ "solana-frozen-abi 1.16.21",
+ "solana-frozen-abi-macro 1.16.21",
  "solana-measure",
  "solana-metrics",
- "solana-sdk 1.16.17",
+ "solana-sdk 1.16.21",
  "solana_rbpf",
  "thiserror",
 ]
 
 [[package]]
 name = "solana-sdk"
-version = "1.16.17"
-source = "git+https://github.com/blockworks-foundation/solana.git?branch=geyser_send_transaction_results_v1.16.17#445f8e7c5185e1c610a98267604a19679d0bade0"
+version = "1.16.21"
+source = "git+https://github.com/blockworks-foundation/solana.git?tag=geyser_send_transaction_results_v1.16.21#39d9ef53392d73d341781dad8fbade4a259f6acf"
 dependencies = [
  "assert_matches",
  "base64 0.21.4",
@@ -3892,11 +3892,11 @@ dependencies = [
  "serde_with",
  "sha2 0.10.8",
  "sha3 0.10.8",
- "solana-frozen-abi 1.16.17",
- "solana-frozen-abi-macro 1.16.17",
- "solana-logger 1.16.17",
- "solana-program 1.16.17",
- "solana-sdk-macro 1.16.17",
+ "solana-frozen-abi 1.16.21",
+ "solana-frozen-abi-macro 1.16.21",
+ "solana-logger 1.16.21",
+ "solana-program 1.16.21",
+ "solana-sdk-macro 1.16.21",
  "thiserror",
  "uriparse",
  "wasm-bindgen",
@@ -3958,8 +3958,8 @@ dependencies = [
 
 [[package]]
 name = "solana-sdk-macro"
-version = "1.16.17"
-source = "git+https://github.com/blockworks-foundation/solana.git?branch=geyser_send_transaction_results_v1.16.17#445f8e7c5185e1c610a98267604a19679d0bade0"
+version = "1.16.21"
+source = "git+https://github.com/blockworks-foundation/solana.git?tag=geyser_send_transaction_results_v1.16.21#39d9ef53392d73d341781dad8fbade4a259f6acf"
 dependencies = [
  "bs58",
  "proc-macro2",
@@ -3983,8 +3983,8 @@ dependencies = [
 
 [[package]]
 name = "solana-transaction-status"
-version = "1.16.17"
-source = "git+https://github.com/blockworks-foundation/solana.git?branch=geyser_send_transaction_results_v1.16.17#445f8e7c5185e1c610a98267604a19679d0bade0"
+version = "1.16.21"
+source = "git+https://github.com/blockworks-foundation/solana.git?tag=geyser_send_transaction_results_v1.16.21#39d9ef53392d73d341781dad8fbade4a259f6acf"
 dependencies = [
  "Inflector",
  "base64 0.21.4",
@@ -3998,7 +3998,7 @@ dependencies = [
  "serde_json",
  "solana-account-decoder",
  "solana-address-lookup-table-program",
- "solana-sdk 1.16.17",
+ "solana-sdk 1.16.21",
  "spl-associated-token-account",
  "spl-memo",
  "spl-token",
@@ -5172,7 +5172,7 @@ dependencies = [
  "log",
  "maplit",
  "serde_json",
- "solana-sdk 1.16.17",
+ "solana-sdk 1.16.21",
  "solana-transaction-status",
  "tokio",
  "yellowstone-grpc-client",
@@ -5199,8 +5199,8 @@ dependencies = [
  "serde",
  "serde_json",
  "solana-geyser-plugin-interface",
- "solana-logger 1.16.17",
- "solana-sdk 1.16.17",
+ "solana-logger 1.16.21",
+ "solana-sdk 1.16.21",
  "solana-transaction-status",
  "spl-token-2022",
  "tokio",
@@ -5220,7 +5220,7 @@ dependencies = [
  "prost 0.12.1",
  "protobuf-src",
  "solana-account-decoder",
- "solana-sdk 1.16.17",
+ "solana-sdk 1.16.21",
  "solana-transaction-status",
  "tonic 0.10.2",
  "tonic-build",
